@@ -1,0 +1,20 @@
+Package: DP.EP.Web
+Title: DynastyProcess.com - EP - Web
+Version: 0.0.1
+Authors@R: 
+    c(
+    person(given = "Joe",
+           family = "Sydlowski",
+           role = c("aut"),
+           email = "syd235@gmail.com")
+    person(given = "Tan",
+           family = "Ho",
+           role = c("aut","cre"),
+           email = "tan@tanho.ca",
+           comment = c(ORCID = "0000-0001-8388-5155")))
+Description: Publishes the DynastyProcess EP model as a Distill based website.
+License: CC BY SA 4.0
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1

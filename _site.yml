@@ -1,12 +1,15 @@
-name: "_dynastyprocess"
-title: "expectedpoints_web"
+name: "DynastyProcess.com"
+title: "Expected Points - DynastyProcess.com"
 description: |
-  expectedpoints_web
+  DynastyProcess.com's EP model outputs.
 output_dir: "docs"
+theme: dynastyprocess.css
 navbar:
   right:
     - text: "Home"
       href: index.html
-    - text: "About"
-      href: about.html
+    - text: "Details"
+      href: details.html
+    - text: "GitHub"
+      href: https://github.com/dynastyprocess/expectedpoints
 output: distill::distill_article

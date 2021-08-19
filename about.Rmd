@@ -1,7 +1,7 @@
 ---
-title: "About this site"
+title: "About EP"
 description: |
-  Some additional details about the website
+  Information about the modelling
 ---
 
 ```{r setup, include=FALSE}
