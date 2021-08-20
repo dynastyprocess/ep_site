@@ -61,10 +61,17 @@ table_ep <- crosstalk_ep %>%
     highlight = TRUE,
     resizable = TRUE,
     compact = TRUE,
-    defaultColDef = colDef(minWidth = 75),
+    columns = list(
+      `Season` = colDef(minWidth = 75),
+      `Player Name` = colDef(minWidth = 100)
+    ),
+    defaultColDef = colDef(minWidth = 60),
     fullWidth = TRUE,
     defaultSortOrder = "desc",
-    defaultSorted = c("Season", "Total FP X")
+    defaultSorted = c("Season", "Total FP X"),
+    defaultPageSize = 25,
+    pageSizeOptions = c(25,50,100,500),
+    showPageSizeOptions = TRUE
   )
 
 bscols(
