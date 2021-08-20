@@ -66,7 +66,8 @@ table_ep <- crosstalk_ep %>%
       `Player Name` = colDef(minWidth = 100,
                              sticky = "left")
     ),
-    defaultColDef = colDef(minWidth = 60),
+    defaultColDef = colDef(minWidth = 70,
+                           format = colFormat(digits = 1)),
     fullWidth = TRUE,
     defaultSortOrder = "desc",
     defaultSorted = c("Season", "Total FP X"),
