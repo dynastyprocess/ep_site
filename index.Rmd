@@ -15,9 +15,9 @@ library(janitor)
 
 ep <- arrow::read_parquet("data/ep_1999_2019.pdata") %>%
   select(
+    player_name = Name,
     season = Season,
     week = Week,
-    player_name = Name,
     pos = Pos,
     team = Team,
     total_fp_x,
@@ -35,7 +35,7 @@ ep <- arrow::read_parquet("data/ep_1999_2019.pdata") %>%
     gsis_id
   ) %>%
   filter(season %in% 2016:2020, pos %in% c("QB", "RB", "WR", "TE"), week <= 17) %>%
-  group_by(season, gsis_id, player_name, pos, team) %>%
+  group_by(player_name, season, gsis_id, pos, team) %>%
   summarise(
     games = n(),
     across(.fns = ~ mean(.x, na.rm = TRUE) %>% round(1))
@@ -63,7 +63,8 @@ table_ep <- crosstalk_ep %>%
     compact = TRUE,
     columns = list(
       `Season` = colDef(minWidth = 75),
-      `Player Name` = colDef(minWidth = 100)
+      `Player Name` = colDef(minWidth = 100,
+                             sticky = "left")
     ),
     defaultColDef = colDef(minWidth = 60),
     fullWidth = TRUE,
