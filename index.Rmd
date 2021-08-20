@@ -13,7 +13,7 @@ library(arrow)
 library(dplyr)
 library(janitor)
 
-ep <- arrow::read_parquet("data/ep_1999_2019.pdata") %>% 
+ep <- arrow::read_parquet("data/ep_1999_2019.pdata") %>%
   select(
     season = Season,
     week = Week,
@@ -33,49 +33,46 @@ ep <- arrow::read_parquet("data/ep_1999_2019.pdata") %>%
     pass_fp,
     pass_fp_diff,
     gsis_id
-  ) %>% 
-  filter(season %in% 2016:2020, pos %in% c("QB","RB","WR","TE")) %>% 
-  group_by(season,gsis_id,player_name,pos,team) %>% 
+  ) %>%
+  filter(season %in% 2016:2020, pos %in% c("QB", "RB", "WR", "TE"), week <= 17) %>%
+  group_by(season, gsis_id, player_name, pos, team) %>%
   summarise(
     games = n(),
-    across(.fns = ~mean(.x,na.rm = TRUE) %>% round(1))
-  ) %>% 
-  ungroup() %>% 
-  select(-gsis_id,-week) %>% 
-  janitor::clean_names("title") %>% 
-  rename_with(~stringr::str_replace(.x,"Fp","FP") %>% stringr::str_replace(" x"," X"))
+    across(.fns = ~ mean(.x, na.rm = TRUE) %>% round(1))
+  ) %>%
+  ungroup() %>%
+  select(-gsis_id, -week) %>%
+  janitor::clean_names("title") %>%
+  rename_with(~ stringr::str_replace(.x, "Fp", "FP") %>% stringr::str_replace(" x", " X"))
 
 crosstalk_ep <- crosstalk::SharedData$new(ep)
-
 ```
 
-### Season Average Expected Points
+
 
 ```{r layout = "l-body-outset", fig.width = 16, fig.height = 16}
 
-table_ep <- crosstalk_ep %>% 
+htmltools::tags$h3("Season Average Expected Points")
+
+table_ep <- crosstalk_ep %>%
   reactable(
     searchable = TRUE,
     striped = TRUE,
     highlight = TRUE,
     resizable = TRUE,
     compact = TRUE,
-    defaultColDef =  colDef(minWidth = 75),
+    defaultColDef = colDef(minWidth = 75),
     fullWidth = TRUE,
     defaultSortOrder = "desc",
-    defaultSorted = c("Season","Total FP X")
+    defaultSorted = c("Season", "Total FP X")
   )
 
 bscols(
-  widths = c(2,10),
-  list(
-    filter_checkbox("pos","Position",crosstalk_ep,~`Pos`),
-    filter_select("team", "Team", crosstalk_ep, ~`Team`),
-    filter_slider("season","Season",crosstalk_ep,~`Season`,ticks = FALSE, width = "100%",sep = NULL,step = 1),
-    filter_slider("gp","Games Played",crosstalk_ep,~`Games`,ticks = FALSE, width = "100%")
-  ),
-  table_ep
+  widths = rep_len(3, 4),
+  filter_checkbox("pos", "Position", crosstalk_ep, ~`Pos`, inline = TRUE),
+  filter_select("team", "Team", crosstalk_ep, ~`Team`),
+  filter_slider("season", "Season", crosstalk_ep, ~`Season`, ticks = FALSE, width = "100%", sep = NULL, step = 1),
+  filter_slider("gp", "Games Played", crosstalk_ep, ~`Games`, ticks = FALSE, width = "100%")
 )
-
+table_ep
 ```
-
