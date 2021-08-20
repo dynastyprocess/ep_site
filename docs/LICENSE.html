@@ -2071,8 +2071,11 @@
     --fig-cap-color:   rgba(0, 0, 0, 0.6);
     /*-- Specify custom fonts ~~~ must be imported above   --*/
     --heading-font:    'Bai Jamjuree', sans-serif;
+    --heading-default:    'Bai Jamjuree', sans-serif;
     --mono-font:       'Fira Mono', monospace;
+    --mono-default:    'Fira Mono', monospace;
     --body-font:       'IBM Plex Sans', sans-serif;
+    --body-default:    'IBM Plex Sans', sans-serif;
     --navbar-font:     'Bai Jamjuree', sans-serif;  /* websites + blogs only */
   }
 
@@ -2119,11 +2122,12 @@
   /*-- Additional custom styles --*/
   /* Add any additional CSS rules below                      */
 
-  body {
-    font-family: var(--body-font);
+  * {
+    font-family: 'IBM Plex Sans', sans-serif;
   }
-  h1,h2,h3,h4,h5,h6 {
-    font-family: var(--heading-font);
+
+  h1,h2,h3,h4,h5,h6,.d-title,.distill-site-header {
+    font-family: 'Bai Jamjuree', sans-serif;
   }</style>
   <style type="text/css">
   /* base style */
