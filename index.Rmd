@@ -62,7 +62,9 @@ table_ep <- crosstalk_ep %>%
     resizable = TRUE,
     compact = TRUE,
     columns = list(
-      `Season` = colDef(minWidth = 75),
+      `Season` = colDef(minWidth = 75,
+                        format = colFormat(digits = 0)),
+      `Games` = colDef(name = "GP", format = colFormat(digits = 0)),
       `Player Name` = colDef(minWidth = 100,
                              sticky = "left")
     ),
