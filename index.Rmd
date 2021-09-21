@@ -20,19 +20,26 @@ ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
     week,
     pos = position,
     team = posteam,
-    contains("total_fantasy_points"),
-    contains("rec_fantasy_points"),
-    contains("rush_fantasy_points"),
-    contains("pass_fantasy_points"),
-
+    total_fantasy_points_exp,
+    total_fantasy_points,
+    total_fantasy_points_diff,
+    rec_fantasy_points_exp,
+    rec_fantasy_points,
+    rec_fantasy_points_diff,
+    rush_fantasy_points_exp,
+    rush_fantasy_points,
+    rush_fantasy_points_diff,
+    pass_fantasy_points_exp,
+    pass_fantasy_points,
+    pass_fantasy_points_diff,
     gsis_id = player_id
   ) %>%
   filter(pos %in% c("QB", "RB", "WR", "TE")) %>%
   group_by(player_name, gsis_id, pos, team) %>%
   summarise(
-    games = n(),
     across(.cols = where(is.numeric),
-           .fns = ~ mean(.x, na.rm = TRUE) %>% round(1))
+           .fns = ~ mean(.x, na.rm = TRUE) %>% round(1)),
+        games = n()
   ) %>%
   ungroup() %>%
   select(-gsis_id) %>%
