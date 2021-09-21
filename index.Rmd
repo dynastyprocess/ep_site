@@ -16,7 +16,7 @@ library(janitor)
 ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
   select(
     player_name = full_name,
-    season,
+    # season,
     week,
     pos = position,
     team = posteam,
@@ -24,7 +24,7 @@ ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
     gsis_id = player_id
   ) %>%
   filter(pos %in% c("QB", "RB", "WR", "TE")) %>%
-  group_by(player_name, season, gsis_id, pos, team) %>%
+  group_by(player_name, gsis_id, pos, team) %>%
   summarise(
     games = n(),
     across(.cols = where(is.numeric),
@@ -52,8 +52,8 @@ table_ep <- crosstalk_ep %>%
     resizable = TRUE,
     compact = TRUE,
     columns = list(
-      `Season` = colDef(minWidth = 75,
-                        format = colFormat(digits = 0)),
+      # `Season` = colDef(minWidth = 75,
+      #                   format = colFormat(digits = 0)),
       `Games` = colDef(name = "GP", format = colFormat(digits = 0)),
       `Player Name` = colDef(minWidth = 100)
     ),
@@ -61,7 +61,7 @@ table_ep <- crosstalk_ep %>%
                            format = colFormat(digits = 1)),
     fullWidth = TRUE,
     defaultSortOrder = "desc",
-    defaultSorted = c("Season", "Total FP Exp"),
+    defaultSorted = c("Total FP Exp"),
     defaultPageSize = 25,
     pageSizeOptions = c(25,50,100,500),
     showPageSizeOptions = TRUE
