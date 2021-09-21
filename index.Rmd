@@ -20,7 +20,11 @@ ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
     week,
     pos = position,
     team = posteam,
-    contains("fantasy_points"),
+    contains("total_fantasy_points"),
+    contains("rec_fantasy_points"),
+    contains("rush_fantasy_points"),
+    contains("pass_fantasy_points"),
+
     gsis_id = player_id
   ) %>%
   filter(pos %in% c("QB", "RB", "WR", "TE")) %>%
@@ -40,7 +44,7 @@ crosstalk_ep <- crosstalk::SharedData$new(ep)
 
 
 
-```{r layout = "l-body-outset", fig.width = 16, fig.height = 16}
+```{r layout = "l-screen", fig.width = 16, fig.height = 16}
 
 htmltools::tags$h3("Season Average Expected Points")
 
@@ -71,8 +75,9 @@ bscols(
   widths = rep_len(3, 4),
   filter_checkbox("pos", "Position", crosstalk_ep, ~`Pos`, inline = TRUE),
   filter_select("team", "Team", crosstalk_ep, ~`Team`),
+  filter_slider("Total FP Exp", "EP", crosstalk_ep, ~`Total FP Exp`)
   # filter_slider("season", "Season", crosstalk_ep, ~`Season`, ticks = FALSE, width = "100%", sep = NULL, step = 1),
-  filter_slider("gp", "Games Played", crosstalk_ep, ~`Games`, ticks = FALSE, width = "100%")
+  # filter_slider("gp", "Games Played", crosstalk_ep, ~`Games`, ticks = FALSE, width = "100%")
 )
 table_ep
 ```
