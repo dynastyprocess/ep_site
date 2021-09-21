@@ -12,6 +12,13 @@ library(crosstalk)
 library(arrow)
 library(dplyr)
 library(janitor)
+library(ffpros)
+library(ffscrapr)
+library(tidyr)
+
+fp <- fp_rankings(page = "ros-ppr-overall", sport = "nfl", year = 2021) %>%
+  left_join(select(dp_playerids(), fantasypros_id, gsis_id), by = "fantasypros_id") %>% 
+  transmute(gsis_id, "ROS ECR" = round(ecr,1))
 
 ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
   select(
@@ -42,16 +49,19 @@ ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
         games = n()
   ) %>%
   ungroup() %>%
-  select(-gsis_id) %>%
   janitor::clean_names("title") %>%
-  rename_with(~ stringr::str_replace(.x, "Fantasy Points", "FP"))
+  rename_with(~ stringr::str_replace(.x, "Fantasy Points", "FP")) %>%
+  left_join(fp, by = c("Gsis Id" = "gsis_id")) %>% 
+  select(-"Gsis Id") %>%
+  mutate("ROS ECR" = replace_na(`ROS ECR`, max(`ROS ECR`, na.rm = TRUE))) %>% 
+  relocate("ROS ECR", .after = "Team")
 
 crosstalk_ep <- crosstalk::SharedData$new(ep)
 ```
 
 
 
-```{r layout = "l-screen", fig.width = 16, fig.height = 16}
+```{r layout = "l-page", fig.width = 16, fig.height = 16}
 
 htmltools::tags$h3("Season Average Expected Points")
 
