@@ -24,7 +24,7 @@ ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
   transmute(
     player_name = full_name,
     # season,
-    weeks = week,
+    week = week,
     pos = position,
     team = posteam,
     total_fantasy_points_exp,
@@ -36,9 +36,13 @@ ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
     total_touchdown_exp,
     total_touchdown,
     total_touchdown_diff,
-    display = glue::glue("{full_name}, {pos} {team}")
-    # gsis_id = player_id
+    display = glue::glue("{full_name}, {pos} {team}"),
+    player_id
   ) %>%
+  group_by(player_id) %>% 
+  mutate(sortby = -mean(total_fantasy_points_exp, na.rm = TRUE)) %>%
+  ungroup() %>% 
+  select(-player_id) %>% 
   filter(pos %in% c("QB", "RB", "WR", "TE")) %>%
   # group_by(player_name, gsis_id, pos, team) %>%
   # summarise(
@@ -69,13 +73,15 @@ table_ep <- crosstalk_ep %>%
     highlight = TRUE,
     resizable = TRUE,
     compact = TRUE,
+    # rownames = TRUE,
     groupBy = "Display",
     columns = list(
-      `Display` = colDef(name = "Player", minWidth = 120,sticky = "left"),
+      `Display` = colDef(name = "Player", minWidth = 150,sticky = "left"),
+      Sortby = colDef(show = FALSE),
       `Pos` = colDef(show = FALSE),
       `Team` = colDef(show = FALSE),
       `Player Name` = colDef(show = FALSE),
-      `Weeks` = colDef(minWidth = 50, aggregate = "count", format = colFormat(digits = 0)),
+      `Week` = colDef(minWidth = 30,aggregate = NULL, format = colFormat(digits = 0)),
       # `Games` = colDef(name = "GP", format = colFormat(digits = 0)),
       `Total FP` = colDef(name = "Actual"),
       `Total Yards Gained` = colDef(name = "Actual"),
@@ -92,24 +98,25 @@ table_ep <- crosstalk_ep %>%
       colGroup(name = "Yards", c("Total Yards Gained", "Total Yards Gained Exp", "Total Yards Gained Diff")),
       colGroup(name = "Touchdowns", c("Total Touchdown Exp", "Total Touchdown", "Total Touchdown Diff"))
     ),
-    defaultColDef = colDef(minWidth = 70,
+    defaultColDef = colDef(minWidth = 50,
                            format = colFormat(digits = 1),
                            aggregate = "mean"),
     fullWidth = TRUE,
-    defaultSortOrder = "desc",
-    defaultSorted = c("Total FP Exp"),
+    defaultSortOrder = "asc",
+    showSortIcon = FALSE,
+    defaultSorted = c("Sortby","Week"),
     defaultPageSize = 25,
     pageSizeOptions = c(25,50,100,500),
     showPageSizeOptions = TRUE
   )
 
 bscols(
-  widths = rep_len(2, 5),
+  widths = c(rep_len(2, 4),4),
   filter_select("player","Player",crosstalk_ep, ~`Player Name`),
   filter_select("pos","Position",crosstalk_ep, ~`Pos`),
   filter_select("team", "Team", crosstalk_ep, ~`Team`),
-  filter_select("weeks", "Week", crosstalk_ep, ~`Weeks`),
-  filter_slider("Total FP Exp", "EP", crosstalk_ep, ~`Total FP Exp`)
+  filter_select("week", "Week", crosstalk_ep, ~`Week`),
+  filter_slider("ep", "EP", crosstalk_ep, ~-`Sortby`)
   # filter_slider("season", "Season", crosstalk_ep, ~`Season`, ticks = FALSE, width = "100%", sep = NULL, step = 1),
   # filter_slider("gp", "Games Played", crosstalk_ep, ~`Games`, ticks = FALSE, width = "100%")
 )
