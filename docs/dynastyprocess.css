@@ -28,11 +28,8 @@ html {
   --fig-cap-color:   rgba(0, 0, 0, 0.6);
   /*-- Specify custom fonts ~~~ must be imported above   --*/
   --heading-font:    'Bai Jamjuree', sans-serif;
-  --heading-default:    'Bai Jamjuree', sans-serif;
   --mono-font:       'Fira Mono', monospace;
-  --mono-default:    'Fira Mono', monospace;
   --body-font:       'IBM Plex Sans', sans-serif;
-  --body-default:    'IBM Plex Sans', sans-serif;
   --navbar-font:     'Bai Jamjuree', sans-serif;  /* websites + blogs only */
 }
 
@@ -85,4 +82,8 @@ d-appendix {
 
 h1,h2,h3,h4,h5,h6,.d-title,.distill-site-header {
   font-family: 'Bai Jamjuree', sans-serif;
+}
+
+.rt-search{
+  align-self: flex-start;
 }
