@@ -106,7 +106,7 @@ table_ep <- crosstalk_ep %>%
 
 bscols(
   widths = rep_len(2, 5),
-  filter_select("player","Plyaer",crosstalk_ep, ~`Player Name`),
+  filter_select("player","Player",crosstalk_ep, ~`Player Name`),
   filter_select("pos","Position",crosstalk_ep, ~`Pos`),
   filter_select("team", "Team", crosstalk_ep, ~`Team`),
   filter_select("weeks", "Week", crosstalk_ep, ~`Weeks`),
