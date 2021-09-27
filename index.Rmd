@@ -76,12 +76,12 @@ table_ep <- crosstalk_ep %>%
     # rownames = TRUE,
     groupBy = "Display",
     columns = list(
-      `Display` = colDef(name = "Player", minWidth = 150,sticky = "left"),
+      `Display` = colDef(name = "Player", minWidth = 120,sticky = "left"),
       Sortby = colDef(show = FALSE),
       `Pos` = colDef(show = FALSE),
       `Team` = colDef(show = FALSE),
       `Player Name` = colDef(show = FALSE),
-      `Week` = colDef(minWidth = 30,aggregate = NULL, format = colFormat(digits = 0)),
+      `Week` = colDef(name = "Wk", minWidth = 40,aggregate = NULL, format = colFormat(digits = 0)),
       # `Games` = colDef(name = "GP", format = colFormat(digits = 0)),
       `Total FP` = colDef(name = "Actual"),
       `Total Yards Gained` = colDef(name = "Actual"),
@@ -98,7 +98,7 @@ table_ep <- crosstalk_ep %>%
       colGroup(name = "Yards", c("Total Yards Gained", "Total Yards Gained Exp", "Total Yards Gained Diff")),
       colGroup(name = "Touchdowns", c("Total Touchdown Exp", "Total Touchdown", "Total Touchdown Diff"))
     ),
-    defaultColDef = colDef(minWidth = 50,
+    defaultColDef = colDef(minWidth = 60,
                            format = colFormat(digits = 1),
                            aggregate = "mean"),
     fullWidth = TRUE,
