@@ -71,7 +71,7 @@ table_ep <- crosstalk_ep %>%
     compact = TRUE,
     groupBy = "Display",
     columns = list(
-      `Display` = colDef(name = "Player", minWidth = 120),
+      `Display` = colDef(name = "Player", minWidth = 120,sticky = "left"),
       `Pos` = colDef(show = FALSE),
       `Team` = colDef(show = FALSE),
       `Player Name` = colDef(show = FALSE),
@@ -88,7 +88,6 @@ table_ep <- crosstalk_ep %>%
       `Total Touchdown Diff` = colDef(name = "Diff")
     ),
     columnGroups = list(
-      colGroup(name = "Player", c("Player Name", "Pos","Team"), sticky = "left"),
       colGroup(name = "Fantasy Points", c("Total FP","Total FP Exp", "Total FP Diff")),
       colGroup(name = "Yards", c("Total Yards Gained", "Total Yards Gained Exp", "Total Yards Gained Diff")),
       colGroup(name = "Touchdowns", c("Total Touchdown Exp", "Total Touchdown", "Total Touchdown Diff"))
