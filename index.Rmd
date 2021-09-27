@@ -78,7 +78,7 @@ table_ep <- crosstalk_ep %>%
       `Weeks` = colDef(minWidth = 50, aggregate = "count", format = colFormat(digits = 0)),
       # `Games` = colDef(name = "GP", format = colFormat(digits = 0)),
       `Total FP` = colDef(name = "Actual"),
-      `Total Yards` = colDef(name = "Actual"),
+      `Total Yards Gained` = colDef(name = "Actual"),
       `Total Touchdown` = colDef(name = "Actual"),
       `Total FP Exp` = colDef(name = "Exp"),
       `Total Yards Gained Exp` = colDef(name = "Exp"),
