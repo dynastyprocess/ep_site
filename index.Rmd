@@ -34,7 +34,7 @@ ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
     # season,
     week_num = week,
     week = as.character(week),
-    pos = position,
+    pos = forcats::fct_relevel(position,c("QB","RB","WR","TE")),
     team,
     total_fantasy_points_exp,
     total_fantasy_points,
