@@ -16,9 +16,16 @@ library(ffpros)
 library(ffscrapr)
 library(tidyr)
 
-fp <- fp_rankings(page = "ros-ppr-overall", sport = "nfl", year = 2021) %>%
-  left_join(select(dp_playerids(), fantasypros_id, gsis_id), by = "fantasypros_id") %>% 
-  transmute(gsis_id, "ROS ECR" = round(ecr,1))
+make_color_pal <- function(colors, bias = 1) {
+  get_color <- colorRamp(colors, bias = bias)
+  function(x) rgb(get_color(x), maxColorValue = 255)
+}
+
+good_color <- make_color_pal(c("#762a83", "#af8dc3", "#e7d4e8", "#f7f7f7", "#d9f0d3", "#7fbf7b", "#1b7837"), bias = 2)
+
+# fp <- fp_rankings(page = "ros-ppr-overall", sport = "nfl", year = 2021) %>%
+#   left_join(select(dp_playerids(), fantasypros_id, gsis_id), by = "fantasypros_id") %>% 
+#   transmute(gsis_id, "ROS ECR" = round(ecr,1))
 
 ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
   transmute(
@@ -26,7 +33,7 @@ ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
     # season,
     week = week,
     pos = position,
-    team = posteam,
+    team,
     total_fantasy_points_exp,
     total_fantasy_points,
     total_fantasy_points_diff,
@@ -36,8 +43,9 @@ ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
     total_touchdown_exp,
     total_touchdown,
     total_touchdown_diff,
+    offense_pct,
     display = glue::glue("{full_name}, {pos} {team}"),
-    player_id
+    player_id = gsis_id
   ) %>%
   group_by(player_id) %>% 
   mutate(sortby = -mean(total_fantasy_points_exp, na.rm = TRUE)) %>%
@@ -81,7 +89,7 @@ table_ep <- crosstalk_ep %>%
       `Pos` = colDef(show = FALSE),
       `Team` = colDef(show = FALSE),
       `Player Name` = colDef(show = FALSE),
-      `Week` = colDef(name = "Wk", minWidth = 40,aggregate = NULL, format = colFormat(digits = 0)),
+      `Week` = colDef(name = "Wk", minWidth = 40, aggregate = NULL, format = colFormat(digits = 0)),
       # `Games` = colDef(name = "GP", format = colFormat(digits = 0)),
       `Total FP` = colDef(name = "Actual"),
       `Total Yards Gained` = colDef(name = "Actual"),
@@ -90,8 +98,17 @@ table_ep <- crosstalk_ep %>%
       `Total Yards Gained Exp` = colDef(name = "Exp"),
       `Total Touchdown Exp` = colDef(name = "Exp"),
       `Total FP Diff` = colDef(name = "Diff"),
+                              # style = function(value) {
+                              #   value
+                              #   normalized <- case_when(value >= 5 ~ 1,
+                              #                           value <= -5 ~ 0,
+                              #                           TRUE ~ (value + 5) / 10)
+                              #   color <- good_color(normalized)
+                              #   list(background = color, fontWeight = "bold")
+                              # }),
       `Total Yards Gained Diff` = colDef(name = "Diff"),
-      `Total Touchdown Diff` = colDef(name = "Diff")
+      `Total Touchdown Diff` = colDef(name = "Diff"),
+      `Offense Pct` = colDef(name = "Snap %", format = colFormat(percent = TRUE, digits = 0))
     ),
     columnGroups = list(
       colGroup(name = "Fantasy Points", c("Total FP","Total FP Exp", "Total FP Diff")),
