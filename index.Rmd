@@ -137,7 +137,7 @@ table_ep <- crosstalk_ep %>%
 
 tags$details(
   class = "l-page",
-  tags$summary(tags$strong(style = "font-size: large;","Filters")),
+  tags$summary(tags$strong("Filters")),
   bscols(
     widths = rep_len(4, 3),
     filter_select("player","Player",crosstalk_ep, ~`Player Name`),
@@ -146,7 +146,7 @@ tags$details(
     ),
   bscols(
     widths = rep_len(4,3),
-    filter_select("week", "Week", crosstalk_ep, ~`Week Num`),
+    filter_slider("week", "Week", crosstalk_ep, ~`Week Num`, ticks = FALSE, step = 1),
     filter_slider("gp", "Games Played", crosstalk_ep, ~`Games Played`, ticks = FALSE,step = 1),
     filter_slider("ep", "EP", crosstalk_ep, ~-`Sort by`, ticks = FALSE, step = 0.5)
   )
