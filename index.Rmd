@@ -15,6 +15,7 @@ library(janitor)
 library(ffpros)
 library(ffscrapr)
 library(tidyr)
+library(htmltools)
 
 make_color_pal <- function(colors, bias = 1) {
   get_color <- colorRamp(colors, bias = bias)
@@ -31,8 +32,9 @@ ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
   transmute(
     player_name = full_name,
     # season,
-    week = week,
-    pos = position,
+    week_num = week,
+    week = as.character(week),
+    pos = forcats::fct_relevel(position,c("QB","RB","WR","TE")),
     team,
     total_fantasy_points_exp,
     total_fantasy_points,
@@ -48,7 +50,8 @@ ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
     player_id = gsis_id
   ) %>%
   group_by(player_id) %>% 
-  mutate(sortby = -mean(total_fantasy_points_exp, na.rm = TRUE)) %>%
+  mutate(sort_by = -round(mean(total_fantasy_points_exp, na.rm = TRUE)),
+         games_played = n()) %>%
   ungroup() %>% 
   select(-player_id) %>% 
   filter(pos %in% c("QB", "RB", "WR", "TE")) %>%
@@ -61,10 +64,10 @@ ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
   # ungroup() %>%
   janitor::clean_names("title") %>%
   rename_with(~ stringr::str_replace(.x, "Fantasy Points", "FP"))
-  # left_join(fp, by = c("Gsis Id" = "gsis_id")) %>% 
-  # select(-"Gsis Id") %>%
-  # mutate("ROS ECR" = replace_na(`ROS ECR`, max(`ROS ECR`, na.rm = TRUE))) %>% 
-  # relocate("ROS ECR", .after = "Team")
+# left_join(fp, by = c("Gsis Id" = "gsis_id")) %>% 
+# select(-"Gsis Id") %>%
+# mutate("ROS ECR" = replace_na(`ROS ECR`, max(`ROS ECR`, na.rm = TRUE))) %>% 
+# relocate("ROS ECR", .after = "Team")
 
 crosstalk_ep <- crosstalk::SharedData$new(ep)
 ```
@@ -72,7 +75,6 @@ crosstalk_ep <- crosstalk::SharedData$new(ep)
 
 
 ```{r layout = "l-page", fig.width = 16, fig.height = 16}
-
 htmltools::tags$h3("Season Average Expected Points")
 
 table_ep <- crosstalk_ep %>%
@@ -84,13 +86,14 @@ table_ep <- crosstalk_ep %>%
     # rownames = TRUE,
     groupBy = "Display",
     columns = list(
-      `Display` = colDef(name = "Player", minWidth = 120,sticky = "left"),
-      Sortby = colDef(show = FALSE),
+      `Display` = colDef(name = "Player", minWidth = 120, sticky = "left"),
+      `Sort by` = colDef(show = FALSE),
       `Pos` = colDef(show = FALSE),
       `Team` = colDef(show = FALSE),
+      `Week Num` = colDef(show = FALSE),
       `Player Name` = colDef(show = FALSE),
-      `Week` = colDef(name = "Wk", minWidth = 40, aggregate = NULL, format = colFormat(digits = 0)),
-      # `Games` = colDef(name = "GP", format = colFormat(digits = 0)),
+      `Games Played` = colDef(show = FALSE),
+      `Week` = colDef(name = "Wk", minWidth = 40, format = colFormat(digits = 0)),
       `Total FP` = colDef(name = "Actual"),
       `Total Yards Gained` = colDef(name = "Actual"),
       `Total Touchdown` = colDef(name = "Actual"),
@@ -98,14 +101,14 @@ table_ep <- crosstalk_ep %>%
       `Total Yards Gained Exp` = colDef(name = "Exp"),
       `Total Touchdown Exp` = colDef(name = "Exp"),
       `Total FP Diff` = colDef(name = "Diff"),
-                              # style = function(value) {
-                              #   value
-                              #   normalized <- case_when(value >= 5 ~ 1,
-                              #                           value <= -5 ~ 0,
-                              #                           TRUE ~ (value + 5) / 10)
-                              #   color <- good_color(normalized)
-                              #   list(background = color, fontWeight = "bold")
-                              # }),
+      # style = function(value) {
+      #   value
+      #   normalized <- case_when(value >= 5 ~ 1,
+      #                           value <= -5 ~ 0,
+      #                           TRUE ~ (value + 5) / 10)
+      #   color <- good_color(normalized)
+      #   list(background = color, fontWeight = "bold")
+      # }),
       `Total Yards Gained Diff` = colDef(name = "Diff"),
       `Total Touchdown Diff` = colDef(name = "Diff"),
       `Offense Pct` = colDef(name = "Snap %", format = colFormat(percent = TRUE, digits = 0))
@@ -121,21 +124,34 @@ table_ep <- crosstalk_ep %>%
     fullWidth = TRUE,
     defaultSortOrder = "asc",
     showSortIcon = FALSE,
-    defaultSorted = c("Sortby","Week"),
+    defaultSorted = c("Sort by", "Week Num"),
     defaultPageSize = 25,
     pageSizeOptions = c(25,50,100,500),
     showPageSizeOptions = TRUE
   )
+```
 
-bscols(
-  widths = c(rep_len(2, 4),4),
-  filter_select("player","Player",crosstalk_ep, ~`Player Name`),
-  filter_select("pos","Position",crosstalk_ep, ~`Pos`),
-  filter_select("team", "Team", crosstalk_ep, ~`Team`),
-  filter_select("week", "Week", crosstalk_ep, ~`Week`),
-  filter_slider("ep", "EP", crosstalk_ep, ~-`Sortby`)
-  # filter_slider("season", "Season", crosstalk_ep, ~`Season`, ticks = FALSE, width = "100%", sep = NULL, step = 1),
-  # filter_slider("gp", "Games Played", crosstalk_ep, ~`Games`, ticks = FALSE, width = "100%")
+
+
+```{r layout = "l-page", fig.width = 16, fig.height = 16}
+
+tags$details(
+  class = "l-page",
+  tags$summary(tags$strong("Filters")),
+  bscols(
+    widths = rep_len(4, 3),
+    filter_select("player","Player",crosstalk_ep, ~`Player Name`),
+    filter_select("pos","Position",crosstalk_ep, ~`Pos`),
+    filter_select("team", "Team", crosstalk_ep, ~`Team`)
+    ),
+  bscols(
+    widths = rep_len(4,3),
+    filter_slider("week", "Week", crosstalk_ep, ~`Week Num`, ticks = FALSE, step = 1),
+    filter_slider("gp", "Games Played", crosstalk_ep, ~`Games Played`, ticks = FALSE,step = 1),
+    filter_slider("ep", "EP", crosstalk_ep, ~-`Sort by`, ticks = FALSE, step = 0.5)
+  )
+
 )
+# filter_slider("season", "Season", crosstalk_ep, ~`Season`, ticks = FALSE, width = "100%", sep = NULL, step = 1),
 table_ep
 ```
