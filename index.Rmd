@@ -17,16 +17,12 @@ library(ffscrapr)
 library(tidyr)
 library(htmltools)
 
-make_color_pal <- function(colors, bias = 1) {
-  get_color <- colorRamp(colors, bias = bias)
-  function(x) rgb(get_color(x), maxColorValue = 255)
-}
-
-good_color <- make_color_pal(c("#762a83", "#af8dc3", "#e7d4e8", "#f7f7f7", "#d9f0d3", "#7fbf7b", "#1b7837"), bias = 2)
-
-# fp <- fp_rankings(page = "ros-ppr-overall", sport = "nfl", year = 2021) %>%
-#   left_join(select(dp_playerids(), fantasypros_id, gsis_id), by = "fantasypros_id") %>% 
-#   transmute(gsis_id, "ROS ECR" = round(ecr,1))
+# make_color_pal <- function(colors, bias = 1) {
+#   get_color <- colorRamp(colors, bias = bias)
+#   function(x) rgb(get_color(x), maxColorValue = 255)
+# }
+# 
+# good_color <- make_color_pal(c("#762a83", "#af8dc3", "#e7d4e8", "#f7f7f7", "#d9f0d3", "#7fbf7b", "#1b7837"), bias = 2)
 
 ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
   transmute(

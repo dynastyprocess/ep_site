@@ -1,0 +1,179 @@
+---
+title: "DP Expected Points vs ROS Consensus"
+description: |
+  Expected Points modelling - last updated on `r as.character(Sys.Date())`.
+site: distill::distill_website
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(reactable)
+library(crosstalk)
+library(arrow)
+library(dplyr)
+library(janitor)
+library(ffpros)
+library(ffscrapr)
+library(tidyr)
+library(htmltools)
+
+make_color_pal <- function(colors, bias = 1) {
+  get_color <- colorRamp(colors, bias = bias)
+  function(x) rgb(get_color(x), maxColorValue = 255)
+}
+
+good_color <- make_color_pal(c("#1b7837", "#7fbf7b", "#d9f0d3", "#f7f7f7", "#e7d4e8", "#af8dc3", "#762a83"), bias = 2)
+
+fp <- fp_rankings(page = "ros-ppr-overall", sport = "nfl", year = 2021) %>%
+  left_join(select(dp_playerids(), fantasypros_id, gsis_id), by = "fantasypros_id") %>%
+  transmute(gsis_id, ros_ecr = round(ecr,1))
+
+dyn <- fp_rankings(page = "dynasty-overall", sport = "nfl", year = 2021) %>%
+  left_join(select(dp_playerids(), fantasypros_id, gsis_id), by = "fantasypros_id") %>%
+  transmute(gsis_id, dyn_ecr = round(ecr,1))
+
+ep <- arrow::read_parquet("data/expected_points_2021.pdata") %>%
+  transmute(
+    player_name = full_name,
+    pos = forcats::fct_relevel(position,c("QB","RB","WR","TE")),
+    team,
+    total_fantasy_points_exp,
+    total_fantasy_points,
+    offense_pct,
+    display = glue::glue("{full_name}, {pos} {team}"),
+    player_id = gsis_id
+  ) %>%
+  group_by(player_name, pos, team, display, player_id) %>% 
+  summarise(
+    across(.cols = where(is.numeric),
+           .fns = ~ mean(.x, na.rm = TRUE) %>% round(1)),
+    sort_by = -total_fantasy_points_exp,
+    games_played = n()) %>%
+  ungroup() %>% 
+  filter(pos %in% c("QB", "RB", "WR", "TE")) %>%
+  left_join(fp, by = c("player_id" = "gsis_id")) %>%
+  left_join(dyn, by = c("player_id" = "gsis_id")) %>%
+  group_by(pos) %>%
+  mutate(ppg_rank = row_number(-total_fantasy_points),
+         eppg_rank = row_number(-total_fantasy_points_exp),
+         ros_rank = row_number(ros_ecr),
+         dyn_rank = row_number(dyn_ecr)) %>%
+  ungroup() %>% 
+  janitor::clean_names("title") %>%
+  rename_with(~ stringr::str_replace(.x, "Fantasy Points", "FP")) %>%
+  group_by(Pos) %>% 
+  mutate("Ros Ecr" = replace_na(`Ros Ecr`, max(`Ros Ecr`, na.rm = TRUE)),
+         "Ros Rank" = replace_na(`Ros Rank`, max(`Ros Rank`, na.rm = TRUE)),
+         "Dyn Ecr" = replace_na(`Dyn Ecr`, max(`Dyn Ecr`, na.rm = TRUE)),
+         "Dyn Rank" = replace_na(`Dyn Rank`, max(`Dyn Rank`, na.rm = TRUE))) %>% 
+  ungroup()
+
+crosstalk_ep <- crosstalk::SharedData$new(ep)
+```
+
+
+```{r layout = "l-page", fig.width = 16, fig.height = 16}
+htmltools::tags$h3("ROS Comparison")
+
+table_ep <- crosstalk_ep %>%
+  reactable(
+    striped = TRUE,
+    highlight = TRUE,
+    resizable = TRUE,
+    compact = TRUE,
+    # rownames = TRUE,
+    # groupBy = "Display",
+    columns = list(
+      `Display` = colDef(name = "Player", minWidth = 120, sticky = "left"),
+      `Player Id` = colDef(show = FALSE),
+      `Offense Pct` = colDef(show = FALSE),
+      `Sort by` = colDef(show = FALSE),
+      `Pos` = colDef(show = FALSE),
+      `Team` = colDef(show = FALSE),
+      `Player Name` = colDef(show = FALSE),
+      `Games Played` = colDef(show = FALSE),
+      `Total FP` = colDef(name = "PPG"),
+      `Ppg Rank` = colDef(name = "Rank",
+                          style = function(value) {
+                            value
+                            normalized <- 
+                              (value - min(ep$`Ppg Rank`)) /
+                              (max(ep$`Ppg Rank`) - min(ep$`Ppg Rank`))
+                            color <- good_color(normalized)
+                            list(background = color, fontWeight = "bold")
+                          }),
+      `Total FP Exp` = colDef(name = "PPG"),
+      `Eppg Rank` = colDef(name = "Rank",
+                          style = function(value) {
+                            value
+                            normalized <- 
+                              (value - min(ep$`Eppg Rank`)) /
+                              (max(ep$`Eppg Rank`) - min(ep$`Eppg Rank`))
+                            color <- good_color(normalized)
+                            list(background = color, fontWeight = "bold")
+                          }),
+      `Ros Ecr` = colDef(name = "ECR"),
+      `Ros Rank` = colDef(name = "Rank",
+                          style = function(value) {
+                            value
+                            normalized <- 
+                              (value - min(ep$`Ros Rank`)) /
+                              (max(ep$`Ros Rank`) - min(ep$`Ros Rank`))
+                            color <- good_color(normalized)
+                            list(background = color, fontWeight = "bold")
+                          }),
+      `Dyn Ecr` = colDef(name = "ECR"),
+      `Dyn Rank` = colDef(name = "Rank",
+                          style = function(value) {
+                            value
+                            normalized <- 
+                              (value - min(ep$`Dyn Rank`)) /
+                              (max(ep$`Dyn Rank`) - min(ep$`Dyn Rank`))
+                            color <- good_color(normalized)
+                            list(background = color, fontWeight = "bold")
+                          })
+    ),
+    columnGroups = list(
+      colGroup(name = "Fantasy Points", c("Total FP","Ppg Rank")),
+      colGroup(name = "Expected Fantasy Points", c("Total FP Exp", "Eppg Rank")),
+      colGroup(name = "Rest of Season", c("Ros Ecr", "Ros Rank")),
+      colGroup(name = "Dynasty", c("Dyn Ecr", "Dyn Rank"))
+    ),
+    # defaultColDef = colDef(minWidth = 60,
+    #                        format = colFormat(digits = 1),
+    #                        aggregate = "mean"),
+    fullWidth = TRUE,
+    defaultSortOrder = "asc",
+    showSortIcon = FALSE,
+    defaultSorted = c("Sort by"),
+    defaultPageSize = 25,
+    pageSizeOptions = c(25,50,100,500),
+    showPageSizeOptions = TRUE
+  )
+```
+
+
+
+```{r layout = "l-page", fig.width = 16, fig.height = 16}
+
+tags$details(
+  class = "l-page",
+  tags$summary(tags$strong("Filters")),
+  bscols(
+    widths = rep_len(4, 3),
+    filter_select("player","Player",crosstalk_ep, ~`Player Name`),
+    filter_select("pos","Position",crosstalk_ep, ~`Pos`),
+    filter_select("team", "Team", crosstalk_ep, ~`Team`)
+    ),
+  bscols(
+    widths = rep_len(4,3),
+    # filter_slider("week", "Week", crosstalk_ep, ~`Week Num`, ticks = FALSE, step = 1),
+    filter_slider("gp", "Games Played", crosstalk_ep, ~`Games Played`, ticks = FALSE,step = 1),
+    filter_slider("ep", "EP", crosstalk_ep, ~-`Sort by`, ticks = FALSE, step = 0.5)
+  )
+
+)
+# filter_slider("season", "Season", crosstalk_ep, ~`Season`, ticks = FALSE, width = "100%", sep = NULL, step = 1),
+table_ep
+```
