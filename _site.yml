@@ -13,5 +13,5 @@ navbar:
     - text: "ROS View"
       href: ros-view.html
     - text: "GitHub"
-      href: https://github.com/dynastyprocess/expectedpoints
+      href: https://github.com/dynastyprocess/ep_site
 output: distill::distill_article
