@@ -7,19 +7,21 @@ site: distill::distill_website
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-library(reactable)
-library(crosstalk)
-library(dplyr)
+# NFL Packages
 library(nflreadr)
+library(ffpros)
+
+# Data Manipulation
+library(dplyr)
 library(janitor)
 library(forcats)
-library(ffpros)
-library(ffscrapr)
-library(tidyr)
 library(stringr)
 library(glue)
+
+# Output Packages
+library(reactable)
+library(crosstalk)
 library(htmltools)
-library(nflreadr)
 
 ep <- nflreadr::load_ff_opportunity(2017:nflreadr::most_recent_season(), 
                                     stat_type = "weekly") |> 

@@ -8,18 +8,22 @@ site: distill::distill_website
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-library(reactable)
-library(crosstalk)
+# NFL Packages
+library(nflreadr)
+library(ffpros)
+
+# Data Manipulation
 library(dplyr)
 library(janitor)
 library(forcats)
-library(ffpros)
-library(ffscrapr)
-library(tidyr)
-library(glue)
 library(stringr)
+library(glue)
+library(tidyr)
+
+# Output Packages
+library(reactable)
+library(crosstalk)
 library(htmltools)
-library(nflreadr)
 
 make_color_pal <- function(colors, bias = 1) {
   get_color <- colorRamp(colors, bias = bias)
@@ -29,11 +33,11 @@ make_color_pal <- function(colors, bias = 1) {
 good_color <- make_color_pal(c("#1b7837", "#7fbf7b", "#d9f0d3", "#f7f7f7", "#e7d4e8", "#af8dc3", "#762a83"), bias = 2)
 
 fp <- fp_rankings(page = "ros-ppr-overall", sport = "nfl", year = 2022) %>%
-  left_join(select(dp_playerids(), fantasypros_id, gsis_id), by = "fantasypros_id") %>%
+  left_join(select(nflreadr::load_ff_playerids(), fantasypros_id, gsis_id), by = "fantasypros_id") %>%
   transmute(gsis_id, ros_ecr = round(ecr,1))
 
 dyn <- fp_rankings(page = "dynasty-overall", sport = "nfl", year = 2022) %>%
-  left_join(select(dp_playerids(), fantasypros_id, gsis_id), by = "fantasypros_id") %>%
+  left_join(select(nflreadr::load_ff_playerids(), fantasypros_id, gsis_id), by = "fantasypros_id") %>%
   transmute(gsis_id, dyn_ecr = round(ecr,1))
 
 ep <- nflreadr::load_ff_opportunity(nflreadr::most_recent_season(), stat_type = "weekly") |> 
