@@ -17,7 +17,7 @@ library(ffpros)
 library(ffscrapr)
 library(tidyr)
 library(htmltools)
-library(ffopportunity)
+library(nflreadr)
 
 make_color_pal <- function(colors, bias = 1) {
   get_color <- colorRamp(colors, bias = bias)
@@ -34,7 +34,7 @@ dyn <- fp_rankings(page = "dynasty-overall", sport = "nfl", year = 2022) %>%
   left_join(select(dp_playerids(), fantasypros_id, gsis_id), by = "fantasypros_id") %>%
   transmute(gsis_id, dyn_ecr = round(ecr,1))
 
-ep <- ep_load(nflreadr::most_recent_season(), type = "weekly") |> 
+ep <- nflreadr::load_ff_opportunity(nflreadr::most_recent_season(), stat_type = "weekly") |> 
   # mutate(season = as.numeric(season)) %>%
   transmute(
     player_name = full_name,

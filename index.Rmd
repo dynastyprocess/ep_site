@@ -16,9 +16,10 @@ library(ffpros)
 library(ffscrapr)
 library(tidyr)
 library(htmltools)
-library(ffopportunity)
+library(nflreadr)
 
-ep <- ep_load(2017:nflreadr::most_recent_season(), type = "weekly") |> 
+ep <- nflreadr::load_ff_opportunity(2017:nflreadr::most_recent_season(), 
+                                    stat_type = "weekly") |> 
   mutate(season = as.numeric(season)) |> 
   left_join(nflreadr::load_rosters(TRUE) |> select("pfr_id","gsis_id","season"),
             by = c("season","player_id"="gsis_id"),
