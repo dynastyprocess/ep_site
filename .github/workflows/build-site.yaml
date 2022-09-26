@@ -30,16 +30,18 @@ jobs:
             rstudio/crosstalk#70
             ffverse/ffopportunity
             ffverse/ffpros
+            nflverse/nflreadr
             reactable
-            arrow
             dplyr
             janitor
             ffscrapr
             tidyr
+            glue
             htmltools
             rmarkdown
             distill
             knitr
+            stringr
       - name: Render
         run: |
           rmarkdown::render_site()
