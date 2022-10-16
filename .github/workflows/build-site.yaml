@@ -2,7 +2,18 @@
 # https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
 on:
   schedule:
-    - cron: 20 6,10 * 9-12,1 5,1,2
+      # Every day at 9:00 AM UTC / 5:00 AM ET
+    - cron:  '0 9 * 1,2,9-12 *'
+    # TNF 6:00 AM UTC / 2:00 AM ET
+    - cron:  '0 6 * 1,2,9-12 5'
+    # Early window: 10:30 PM UTC / 6:30 PM ET
+    - cron:  '30 22 * 1,2,9-12 0'
+    # Late window: 0:35 AM UTC / 8:35 PM ET
+    - cron:  '35 0 * 1,2,9-12 1'
+    # SNF/MNF: 6:00 AM UTC / 2:00 AM ET
+    - cron:  '00 6 * 1,2,9-12 1'
+    - cron:  '00 6 * 1,2,9-12 2'
+
   workflow_dispatch:
   # push:
   #   branches:
