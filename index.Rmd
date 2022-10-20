@@ -131,6 +131,7 @@ table_ep <- crosstalk_ep %>%
 
 tags$details(
   class = "l-page",
+  open = "",
   tags$summary(tags$strong("Filters")),
   bscols(
     widths = rep_len(4, 3),
