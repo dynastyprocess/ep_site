@@ -141,7 +141,7 @@ tags$details(
     ),
   bscols(
     widths = rep_len(3,4),
-    filter_select("season", "Season", crosstalk_ep, ~Season, selected = "2022"),
+    filter_select("season", "Season", crosstalk_ep, ~Season, selected = "2023"),
     filter_slider("week", "Week", crosstalk_ep, ~`Week Num`, ticks = FALSE, step = 1),
     filter_slider("gp", "Games Played", crosstalk_ep, ~`Games Played`, ticks = FALSE,step = 1),
     filter_slider("ep", "EP", crosstalk_ep, ~-`Sort by`, ticks = FALSE, step = 0.5)
