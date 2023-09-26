@@ -90,6 +90,7 @@ table_ep <- crosstalk_ep %>%
     highlight = TRUE,
     resizable = TRUE,
     compact = TRUE,
+    nowrap = TRUE,
     # rownames = TRUE,
     # groupBy = "Display",
     columns = list(
