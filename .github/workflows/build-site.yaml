@@ -42,7 +42,7 @@ jobs:
             rstudio/crosstalk#70
             ffverse/ffpros
             nflverse/nflreadr
-            reactable
+            glin/reactable
             dplyr
             tidyr
             janitor
