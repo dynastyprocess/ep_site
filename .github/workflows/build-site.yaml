@@ -46,6 +46,7 @@ jobs:
             nflverse/nflreadr
             glin/reactable
             dplyr
+            forcats
             tidyr
             janitor
             glue
